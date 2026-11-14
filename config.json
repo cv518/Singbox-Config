@@ -1,0 +1,259 @@
+{
+  "$schema": "https://sing-box.sagernet.org/schema.json",
+  "log": {
+    "disabled": true,
+    "level": "info"
+  },
+  "dns": {
+    "servers": [
+      {
+        "type": "fakeip",
+        "tag": "Fake-IP",
+        "inet4_range": "198.18.0.0/15",
+        "inet6_range": "2001:2::/48"
+      },
+      {
+        "type": "https",
+        "tag": "Local-DNS",
+        "domain_resolver": "Local-DNS-Resolver",
+        "server": "dns.alidns.com",
+        "server_port": 443,
+        "path": "/dns-query"
+      },
+      {
+        "type": "udp",
+        "tag": "Local-DNS-Resolver",
+        "server": "223.5.5.5",
+        "server_port": 53
+      },
+      {
+        "type": "https",
+        "tag": "Remote-DNS",
+        "detour": "🚀节点选择",
+        "domain_resolver": "Remote-DNS-Resolver",
+        "server": "cloudflare-dns.com",
+        "server_port": 443,
+        "path": "/dns-query"
+      },
+      {
+        "type": "tcp",
+        "tag": "Remote-DNS-Resolver",
+        "detour": "🚀节点选择",
+        "server": "1.1.1.1",
+        "server_port": 53
+      }
+    ],
+    "rules": [
+      {
+        "rule_set": "Category-Ads",
+        "action": "reject"
+      },
+      {
+        "rule_set": [
+          "GeoSite-CN",
+          "GeoSite-Private"
+        ],
+        "action": "route",
+        "server": "Local-DNS"
+      },
+      {
+        "type": "logical",
+        "mode": "and",
+        "rules": [
+          {
+            "domain_suffix": [
+              ".lan",
+              ".localdomain",
+              ".example",
+              ".invalid",
+              ".localhost",
+              ".test",
+              ".local",
+              ".home.arpa",
+              ".msftconnecttest.com",
+              ".msftncsi.com"
+            ],
+            "invert": true
+          },
+          {
+            "query_type": [
+              "A",
+              "AAAA"
+            ]
+          }
+        ],
+        "action": "route",
+        "server": "Fake-IP"
+      }
+    ],
+    "final": "Remote-DNS",
+    "strategy": "prefer_ipv4",
+    "optimistic": {
+      "enabled": true,
+      "timeout": "72h0m0s"
+    }
+  },
+  "http_clients": [
+    {
+      "tag": "http客户端代理",
+      "version": 2,
+      "detour": "🚀节点选择"
+    }
+  ],
+  "inbounds": [
+    {
+      "type": "mixed",
+      "tag": "mixed-in",
+      "listen": "127.0.0.1",
+      "listen_port": 20122,
+      "udp_fragment": false
+    },
+    {
+      "type": "tun",
+      "tag": "tun-in",
+      "address": [
+        "172.18.0.1/30",
+        "fdfe:dcba:9876::1/126"
+      ],
+      "auto_route": true,
+      "strict_route": true,
+      "platform": {
+        "http_proxy": {
+          "enabled": true,
+          "server": "127.0.0.1",
+          "server_port": 20122
+        }
+      }
+    }
+  ],
+  "outbounds": [
+    {
+      "type": "selector",
+      "tag": "🚀节点选择",
+      "outbounds": [
+        "🎈自动选择"
+      ],
+      "interrupt_exist_connections": true
+    },
+    {
+      "type": "urltest",
+      "tag": "🎈自动选择",
+      "outbounds": [],
+      "url": "https://www.gstatic.com/generate_204",
+      "interval": "10m0s",
+      "tolerance": 150,
+      "interrupt_exist_connections": true
+    },
+    {
+      "type": "direct",
+      "tag": "直连"
+    },
+    {
+      "type": "block",
+      "tag": "拦截"
+    }
+  ],
+  "route": {
+    "rules": [
+      {
+        "inbound": "tun-in",
+        "action": "sniff"
+      },
+      {
+        "protocol": "dns",
+        "action": "hijack-dns"
+      },
+      {
+        "network": "icmp",
+        "action": "route",
+        "outbound": "直连"
+      },
+      {
+        "protocol": "quic",
+        "action": "route",
+        "outbound": "拦截"
+      },
+      {
+        "rule_set": "Category-Ads",
+        "action": "route",
+        "outbound": "拦截"
+      },
+      {
+        "rule_set": "GeoSite-Private",
+        "action": "route",
+        "outbound": "直连"
+      },
+      {
+        "rule_set": "GeoSite-CN",
+        "action": "route",
+        "outbound": "直连"
+      },
+      {
+        "rule_set": "GeoIP-Private",
+        "action": "route",
+        "outbound": "直连"
+      },
+      {
+        "rule_set": "GeoIP-CN",
+        "action": "route",
+        "outbound": "直连"
+      },
+      {
+        "rule_set": "GeoLocation-!CN",
+        "action": "route",
+        "outbound": "🚀节点选择"
+      }
+    ],
+    "rule_set": [
+      {
+        "type": "remote",
+        "tag": "Category-Ads",
+        "url": "https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/sing/geo/geosite/category-ads-all.srs",
+        "update_interval": "48h0m0s"
+      },
+      {
+        "type": "remote",
+        "tag": "GeoIP-Private",
+        "url": "https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/sing/geo/geoip/private.srs",
+        "update_interval": "48h0m0s"
+      },
+      {
+        "type": "remote",
+        "tag": "GeoSite-Private",
+        "url": "https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/sing/geo/geosite/private.srs",
+        "update_interval": "48h0m0s"
+      },
+      {
+        "type": "remote",
+        "tag": "GeoIP-CN",
+        "url": "https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/sing/geo/geoip/cn.srs",
+        "update_interval": "48h0m0s"
+      },
+      {
+        "type": "remote",
+        "tag": "GeoSite-CN",
+        "url": "https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/sing/geo/geosite/cn.srs",
+        "update_interval": "48h0m0s"
+      },
+      {
+        "type": "remote",
+        "tag": "GeoLocation-!CN",
+        "url": "https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/sing/geo/geosite/geolocation-!cn.srs",
+        "update_interval": "48h0m0s"
+      }
+    ],
+    "final": "🚀节点选择",
+    "auto_detect_interface": true,
+    "default_domain_resolver": "Local-DNS",
+    "default_http_client": "http客户端代理"
+  },
+  "experimental": {
+    "cache_file": {
+      "enabled": true,
+      "path": "cache.db",
+      "cache_id": "ID_vjgu16mk",
+      "store_fakeip": true,
+      "store_dns": true
+    }
+  }
+}
