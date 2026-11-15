@@ -45,10 +45,6 @@
     ],
     "rules": [
       {
-        "rule_set": "Category-Ads",
-        "action": "reject"
-      },
-      {
         "rule_set": [
           "GeoSite-CN",
           "GeoSite-Private"
@@ -169,10 +165,6 @@
         "action": "reject"
       },
       {
-        "rule_set": "Category-Ads",
-        "action": "reject"
-      },
-      {
         "rule_set": "GeoSite-Private",
         "action": "route",
         "outbound": "直连"
@@ -199,12 +191,6 @@
       }
     ],
     "rule_set": [
-      {
-        "type": "remote",
-        "tag": "Category-Ads",
-        "url": "https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/sing/geo/geosite/category-ads-all.srs",
-        "update_interval": "48h0m0s"
-      },
       {
         "type": "remote",
         "tag": "GeoIP-Private",
