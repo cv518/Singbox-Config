@@ -147,10 +147,6 @@
     {
       "type": "direct",
       "tag": "直连"
-    },
-    {
-      "type": "block",
-      "tag": "拦截"
     }
   ],
   "route": {
@@ -170,13 +166,11 @@
       },
       {
         "protocol": "quic",
-        "action": "route",
-        "outbound": "拦截"
+        "action": "reject"
       },
       {
         "rule_set": "Category-Ads",
-        "action": "route",
-        "outbound": "拦截"
+        "action": "reject"
       },
       {
         "rule_set": "GeoSite-Private",
