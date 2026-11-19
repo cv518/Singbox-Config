@@ -45,6 +45,14 @@
     ],
     "rules": [
       {
+        "clash_mode": "direct",
+        "server": "Local-DNS"
+      },
+      {
+        "clash_mode": "global",
+        "server": "Remote-DNS"
+      },
+      {
         "rule_set": [
           "GeoSite-CN",
           "GeoSite-Private"
@@ -154,6 +162,14 @@
       {
         "protocol": "dns",
         "action": "hijack-dns"
+      },
+      {
+        "clash_mode": "direct",
+        "outbound": "直连"
+      },
+      {
+        "clash_mode": "global",
+        "outbound": "🚀节点选择"
       },
       {
         "network": "icmp",
