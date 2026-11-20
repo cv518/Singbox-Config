@@ -53,7 +53,7 @@
         "server": "Remote-DNS"
       },
       {
-        "rule_set": "category-ads-all",
+        "rule_set": "Category-Ads-All",
         "action": "reject"
       },
       {
@@ -223,7 +223,7 @@
     "rule_set": [
       {
         "type": "remote",
-        "tag": "GeoSite-category-ads-all",
+        "tag": "Category-Ads-All",
         "url": "https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/sing/geo/geosite/category-ads-all.srs",
         "update_interval": "48h0m0s"
       },
