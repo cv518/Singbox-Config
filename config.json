@@ -1,5 +1,3 @@
-//自用Sing-box配置文件，适用于Windows、Linux、macOS、Android、iOS等平台
-//不包含任何节点信息，不含去广告规则。配合脚本注入节点使用
 {
   "$schema": "https://sing-box.sagernet.org/schema.json",
   "log": {
